@@ -1,0 +1,42 @@
+<!-- phylo/templates/phylo/base.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Phylogenetic Tree{% endblock %}</title>
+</head>
+<body>
+
+    <h1>{% block heading %}Phylogenetic Tree Analysis{% endblock %}</h1>
+
+    <form method="post" action="{% url 'phylo_tree' %}">
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div>
+            <label for="{{ form.input_type.id_for_label }}">Select Input Type:</label>
+            {{ form.input_type }}
+            {{ form.input_type.errors }}
+        </div>
+
+        <div>
+            <label for="{{ form.input_data.id_for_label }}">Input Data:</label>
+            {{ form.input_data }}
+            {{ form.input_data.errors }}
+        </div>
+
+        <div>
+            <label for="{{ form.algorithm.id_for_label }}">Select Algorithm:</label>
+            {{ form.algorithm }}
+            {{ form.algorithm.errors }}
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+
+</body>
+</html>

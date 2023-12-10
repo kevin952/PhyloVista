@@ -1,0 +1,11 @@
+{% extends 'phylo/base.html' %}
+
+{% block content %}
+    <h2>Phylogenetic Tree Result</h2>
+
+    {% if tree_image %}
+        <img src="data:image/png;base64,{{ tree_image }}" alt="Phylogenetic Tree">
+    {% else %}
+        <p>No tree available.</p>
+    {% endif %}
+{% endblock %}
