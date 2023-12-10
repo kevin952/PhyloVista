@@ -8,13 +8,11 @@ from Bio.Align import MultipleSeqAlignment
 from .forms import PhyloForm
 import ast
 import string
-from io import StringIO, BytesIO
+from io import StringIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.SeqIO import parse
 from Bio.Align import MultipleSeqAlignment
-import matplotlib.pyplot as plt
-import base64
 
 def home(request):
     return render(request, 'phylo/base.html', {'form': PhyloForm()})
@@ -72,25 +70,13 @@ def phylo_tree(request):
             else:
                 tree = construct_phylo_tree_fasta(data, algorithm)
 
-            if tree:
-                # Plot the phylogenetic tree
-                plt.figure(figsize=(10, 8))
-                Phylo.draw(tree, do_show=False)
-
-                # Convert the plot to a base64-encoded image
-                buffer = BytesIO()
-                plt.savefig(buffer, format='png')
-                plt.close()
-                img_str = base64.b64encode(buffer.getvalue()).decode()
-
-                # Render the result with the tree image
-                return render(request, 'phylo/result.html', {'tree_image': img_str})
+            # Render the result
+            return render(request, 'phylo/result.html', {'tree': tree})
 
     else:
         form = PhyloForm()
 
-    return render(request, 'phylo/base.html', {'form': form})
-
+    return render(request, 'phylo/result.html', {'form': form})
 
 
 def construct_phylo_tree_fasta(data, algorithm):
