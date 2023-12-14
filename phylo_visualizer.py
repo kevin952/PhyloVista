@@ -9,6 +9,7 @@ from PIL import Image
 import random
 import re
 import numpy as np
+import base64
 
 def calculate_distance_matrix(sequences):
     # Convert sequences to SeqRecord objects
@@ -98,6 +99,13 @@ def update_tree(sequence_data, algorithm):
 
     return ["Tree created", updated_tree]
 
+# Function to create a downloadable link for a file
+def get_binary_file_downloader_html(file_path, download_link_text):
+    with open(file_path, 'rb') as f:
+        data = f.read()
+    b64 = base64.b64encode(data).decode()
+    return f'<a href="data:application/octet-stream;base64,{b64}" download="{file_path}">{download_link_text}</a>'
+
 # Streamlit App
 st.title("Phylogenetic Tree Builder")
 
@@ -162,6 +170,9 @@ if operation == "Add Sequence-by-sequence":
             image = Image.open(image_path)
             st.image(image, caption="Phylogenetic Tree")
 
+            # Download button
+            st.markdown(get_binary_file_downloader_html(image_path, 'Phylo_Tree_Image.png'), unsafe_allow_html=True)
+
         
 elif operation == "Add from FASTA":
     sequence_data = []
@@ -205,6 +216,8 @@ elif operation == "Add from FASTA":
             image = Image.open(image_path)
             st.image(image, caption="Phylogenetic Tree")
 
+            # Download button
+            st.markdown(get_binary_file_downloader_html(image_path, 'Download Phylo Tree Image'), unsafe_allow_html=True)
 
 
 else:
