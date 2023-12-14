@@ -1,0 +1,14 @@
+# Ignore virtual environment
+phylo/
+
+# Ignore compiled Python files
+__pycache__/
+
+# Ignore Python byte code
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore environment-related files
+.env
+
