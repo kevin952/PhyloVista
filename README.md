@@ -2,6 +2,10 @@
 
 PhyloVista is an interactive Python application for real-time construction and visualization of phylogenetic trees based on biological sequences. The application supports inputting sequences either manually or from a FASTA file, offers two tree construction algorithms (Neighbor-Joining and UPGMA), and allows users to check the additivity of the input sequences.
 
+## Deployed Application:
+
+- Currently, we have our application deployed and ready for your use: [PhyloVista](https://phylovista.streamlit.app/)
+
 ## Table of Contents
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -53,9 +57,11 @@ pip install -r requirements.txt
 ## Usage
 - Running the Application
 - Execute the following command to run the PhyloVista application:
-```streamlit run phylovista_app.py```
+```
+streamlit run phylovista_app.py
+```
 
-- This will start the Streamlit development server, and the application will be accessible in your web browser a [http://localhost:8501/](http://localhost:8501/)
+- This will start the ```Streamlit development server```, and the application will be accessible in your web browser at : [http://localhost:8501/](http://localhost:8501/)
 
 ## Sequence Input
 ### Add Sequence-by-sequence:
