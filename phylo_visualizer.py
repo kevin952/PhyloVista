@@ -8,6 +8,26 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import random
 
+
+def calculate_distance_matrix(sequences):
+    # Convert sequences to SeqRecord objects
+    seq_records = [SeqRecord(Seq(seq), id=f"seq_{i}") for i, seq in enumerate(sequences)]
+
+    # Convert SeqRecord objects to MultipleSeqAlignment
+    alignment = MultipleSeqAlignment(seq_records)
+
+    # Calculate Jukes-Cantor distance matrix
+    calculator = DistanceCalculator('identity')
+    distance_matrix = calculator.get_distance(alignment)
+
+    return distance_matrix
+
+def create_tree_sequences(distance_matrix):
+    
+    updated_tree = distance_matrix.build_tree(distance_matrix)
+
+    return ["Tree created", updated_tree]
+
 # Function to create a MultipleSeqAlignment object from a list of sequence strings
 def create_alignment(sequences):
     seq_records = [SeqRecord(Seq(seq), id=f"Seq{i+1}") for i, seq in enumerate(sequences)]
