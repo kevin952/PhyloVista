@@ -36,13 +36,19 @@ pip install -r requirements.txt
 ## Installation
 
 - Clone the repository to your local machine:
-``` git clone https://github.com/your-username/phylovista.git```
+```
+git clone https://github.com/your-username/phylovista.git
+```
 
 - Navigate to the project directory:
-```cd phylovista```
+```
+cd phylovista
+```
 
 - Install the required dependencies:
-```pip install -r requirements.txt```
+```
+pip install -r requirements.txt
+```
 
 ## Usage
 - Running the Application
