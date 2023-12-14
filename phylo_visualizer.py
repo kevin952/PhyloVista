@@ -7,26 +7,7 @@ from Bio.Phylo.TreeConstruction import DistanceCalculator, DistanceTreeConstruct
 import matplotlib.pyplot as plt
 from PIL import Image
 import random
-
-
-def calculate_distance_matrix(sequences):
-    # Convert sequences to SeqRecord objects
-    seq_records = [SeqRecord(Seq(seq), id=f"seq_{i}") for i, seq in enumerate(sequences)]
-
-    # Convert SeqRecord objects to MultipleSeqAlignment
-    alignment = MultipleSeqAlignment(seq_records)
-
-    # Calculate Jukes-Cantor distance matrix
-    calculator = DistanceCalculator('identity')
-    distance_matrix = calculator.get_distance(alignment)
-
-    return distance_matrix
-
-def create_tree_sequences(distance_matrix):
-    
-    updated_tree = distance_matrix.build_tree(distance_matrix)
-
-    return ["Tree created", updated_tree]
+import re
 
 # Function to create a MultipleSeqAlignment object from a list of sequence strings
 def create_alignment(sequences):
@@ -35,7 +16,7 @@ def create_alignment(sequences):
     return alignment
 
 # Function to update the tree with a new sequence
-def update_tree(sequence_data, identifier):
+def update_tree(sequence_data, algorithm):
     if len(sequence_data) == 0:
         return ["Please add a sequence to create a tree", None]
 
@@ -45,14 +26,23 @@ def update_tree(sequence_data, identifier):
     # Create a DistanceCalculator object
     calculator = DistanceCalculator('identity')
 
-    # Neighbor-joining
-    constructor_nj = DistanceTreeConstructor(calculator)
-    updated_tree = constructor_nj.build_tree(alignment)
+    # # Choose the tree construction algorithm
+    # if algorithm == 'nj':
+    #     constructor = DistanceTreeConstructor(calculator)
+    # elif algorithm == 'upgma':
+    #     constructor = DistanceTreeConstructor(calculator, method='upgma')
+    # else:
+    #     return ["Invalid algorithm choice", None]
+    constructor = DistanceTreeConstructor(calculator)
+    updated_tree = constructor.build_tree(alignment)
 
     return ["Tree created", updated_tree]
 
 # Streamlit App
 st.title("Phylogenetic Tree Builder")
+
+# # Algorithm choice dropdown
+# algorithm = st.sidebar.selectbox("Choose Algorithm", ["Neighbor-Joining (nj)", "UPGMA"])
 
 # Sidebar
 st.sidebar.header("Choose Operation")
@@ -64,17 +54,37 @@ tree_nj = None
 
 # Main Content
 if operation == "Add Sequence-by-sequence":
-    sequence_data = []
-    tree_nj = None
-    st.subheader("Add Sequences One by One")
-    st.text("Enter a new sequence and click 'Add Sequence' to update the tree.")
-    key = random.randint(1, 1000)
-    while st.button("Add Sequence", key):
-        new_sequence = st.text_area("Enter New Sequence", "")
-        key = random.randint(1, 1000)
-        if new_sequence:
-            sequence_data.append(new_sequence)
-            _, tree_nj = update_tree(sequence_data, f"Seq{len(sequence_data)}")
+    
+    sequences_input = st.text_area("Enter sequences (one per line):", height=200)
+        
+    # Important note for sequences
+    st.sidebar.markdown("**Important note:**")
+    st.sidebar.markdown("Add sequences in A, C, T, G format, one sequence on a new line.")
+    st.sidebar.markdown("**Example:**")
+    st.sidebar.code("ACGT\nCGTA\nTACG")
+
+
+
+    # Display current sequences if not cleared
+    if st.button("Clear Sequences"):
+        sequences_input = ""
+
+    else:
+        st.subheader("Current Sequences:")
+        st.text(sequences_input)
+    
+    # Check additivity button
+    if st.button("Create Tree"):
+        
+            # Check if sequences are in the valid format
+        if not re.search(r'^[ACGTacgt\n]+$', sequences_input):
+            st.error("Invalid sequence format. Sequences must consist of only 'A', 'C', 'G', or 'T' characters, one sequence per line.")
+            
+        else:  
+            # Parse sequences from input
+            sequences = [sequence.strip() for sequence in sequences_input.splitlines()]
+
+            _, tree_nj = update_tree(sequences,"algorithm.lower()")
 
             # Display Tree
             st.subheader("Phylogenetic Tree")
@@ -110,7 +120,7 @@ else:
 
         # sequence_data.extend(new_sequences)
         # _, tree_nj = update_tree(sequence_data, "Seq_from_fasta")
-        _, tree_nj = update_tree(new_sequences, "Seq_from_fasta")
+        _, tree_nj = update_tree(new_sequences, "algorithm.lower()")
 
         # Display Tree
         if tree_nj is not None:
