@@ -30,12 +30,12 @@ def update_tree(sequence_data, identifier):
 
 # Function to add sequences from a FASTA file to the existing sequence_data
 def add_sequences_from_fasta(file_path):
+    new_sequences = []
     with open(file_path, 'r') as fasta_file:
         records = list(parse(fasta_file, 'fasta'))
         for record in records:
-            sequence_data.append(str(record.seq))
-    return sequence_data
-
+            new_sequences.append(str(record.seq))
+    return new_sequences
 
 # Example sequences as strings
 sequence_data = ["ATGGCCATTGTAATGGGCCGCTGAAAGGGTGCCCGATAG"]
@@ -57,11 +57,9 @@ message, tree_nj = update_tree(sequence_data, "Seq3")
 Phylo.draw_ascii(tree_nj)
 
 # Add sequences from a FASTA file and update the tree
-fasta_file_path = "alignment_file.fa"
+fasta_file_path = "align_file.fa"
 new_sequences = add_sequences_from_fasta(fasta_file_path)
-print(len(sequence_data))
 sequence_data.extend(new_sequences)
-print(len(sequence_data))
 message, tree_nj = update_tree(sequence_data, "Seq4")
 
 # Display the updated tree
