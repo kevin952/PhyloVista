@@ -1,11 +1,10 @@
 import streamlit as st
-import pandas as pd
-from Bio import AlignIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Align import MultipleSeqAlignment
 from Bio.Phylo.TreeConstruction import DistanceCalculator
 import numpy as np
+import re
 
 def calculate_distance_matrix(sequences):
     # Convert sequences to SeqRecord objects
@@ -46,7 +45,6 @@ def is_additive(matrix):
 
     return True
 
-
 def parse_distance_matrix(input_text):
     try:
         # Replace square brackets and split values
@@ -73,6 +71,17 @@ def main():
 
     if input_type == "Sequences":
         sequences_input = st.text_area("Enter sequences (one per line):", height=200)
+        
+        # Important note for sequences
+        st.sidebar.markdown("**Important note:**")
+        st.sidebar.markdown("Add sequences in A, C, T, G format, one sequence on a new line.")
+        st.sidebar.markdown("**Example:**")
+        st.sidebar.code("ACGT\nCGTA\nTACG")
+
+        # Check if sequences are in the valid format
+        if not re.search(r'^[ACGTacgt\n]+$', sequences_input):
+            st.error("Invalid sequence format. Sequences must consist of only 'A', 'C', 'G', or 'T' characters, one sequence per line.")
+            return
 
         # Display current sequences if not cleared
         if st.button("Clear Sequences"):
@@ -90,21 +99,31 @@ def main():
             if len(sequences) < 2:
                 st.error("You need at least 2 sequences to check additivity.")
             else:
-                # Calculate distance matrix
-                distance_matrix = calculate_distance_matrix(sequences)
+                # Check if sequences are of the same length
+                if len(set(len(seq) for seq in sequences)) > 1:
+                    st.error("Sequences must be of the same length.")
+                else:
+                    # Calculate distance matrix
+                    distance_matrix = calculate_distance_matrix(sequences)
 
-                # Display distance matrix
-                st.subheader("Distance Matrix:")
-                st.table(distance_matrix)
+                    # Display distance matrix
+                    st.subheader("Distance Matrix:")
+                    st.table(distance_matrix)
 
-                # Check additivity and display result
-                is_additive_result = is_additive(distance_matrix)
-                st.success(f"Additivity Check Result: {is_additive_result}")
+                    # Check additivity and display result
+                    is_additive_result = is_additive(distance_matrix)
+                    st.success(f"Additivity Check Result: {is_additive_result}")
 
     elif input_type == "Distance Matrix":
         # Allow users to input a distance matrix
         st.subheader("Enter Distance Matrix:")
         distance_matrix_input = st.text_area("Enter the distance matrix (comma-separated values):", height=200)
+
+        # Important note for distance matrix
+        st.sidebar.markdown("**Important note:**")
+        st.sidebar.markdown("Enter the distance matrix as a comma-separated values list. Rows and columns should be separated by new lines.")
+        st.sidebar.markdown("**Example:**")
+        st.sidebar.code("[0, 6, 13, 14],\n[6, 0, 15, 16],\n[13, 15, 0, 5],\n[14, 16, 5, 0]")
 
         # Check additivity button for distance matrix
         if st.button("Check Additivity"):
