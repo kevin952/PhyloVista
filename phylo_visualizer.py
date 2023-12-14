@@ -1,13 +1,12 @@
 import streamlit as st
 from Bio import Phylo
-from Bio.SeqIO import parse
-from Bio.Align import MultipleSeqAlignment
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+from Bio.Align import MultipleSeqAlignment
 from Bio.Phylo.TreeConstruction import DistanceCalculator, DistanceTreeConstructor
 import matplotlib.pyplot as plt
 from PIL import Image
-import io
+import random
 
 # Function to create a MultipleSeqAlignment object from a list of sequence strings
 def create_alignment(sequences):
@@ -32,65 +31,83 @@ def update_tree(sequence_data, identifier):
 
     return ["Tree created", updated_tree]
 
-# Function to add sequences from a FASTA file to the existing sequence_data
-def add_sequences_from_fasta(file_path):
-    new_sequences = []
-    with open(file_path, 'r') as fasta_file:
-        records = list(parse(fasta_file, 'fasta'))
-        for record in records:
-            new_sequences.append(str(record.seq))
-    return new_sequences
-
-# Function to build a tree directly from a FASTA file
-def build_tree_from_fasta(file_path):
-    sequence_data = add_sequences_from_fasta(file_path)
-    message, tree_nj = update_tree(sequence_data, "Seq_from_fasta")
-    return message, tree_nj
-
 # Streamlit App
 st.title("Phylogenetic Tree Builder")
 
 # Sidebar
 st.sidebar.header("Choose Operation")
-operation = st.sidebar.radio("", ["Add Sequence", "Add from FASTA", "Add FASTA to String Data"])
+operation = st.sidebar.radio("", ["Add Sequence-by-sequence", "Add from FASTA"])
 
 # Main Content
 sequence_data = []
 tree_nj = None
 
-if operation == "Add Sequence":
-    new_sequence = st.text_area("Enter New Sequence", "")
-    if st.button("Add Sequence"):
-        sequence_data.append(new_sequence)
-        _, tree_nj = update_tree(sequence_data, f"Seq{len(sequence_data)}")
+# Main Content
+if operation == "Add Sequence-by-sequence":
+    sequence_data = []
+    tree_nj = None
+    st.subheader("Add Sequences One by One")
+    st.text("Enter a new sequence and click 'Add Sequence' to update the tree.")
+    key = random.randint(1, 1000)
+    while st.button("Add Sequence", key):
+        new_sequence = st.text_area("Enter New Sequence", "")
+        key = random.randint(1, 1000)
+        if new_sequence:
+            sequence_data.append(new_sequence)
+            _, tree_nj = update_tree(sequence_data, f"Seq{len(sequence_data)}")
 
-elif operation == "Add from FASTA":
+            # Display Tree
+            st.subheader("Phylogenetic Tree")
+            st.text("Click on the image to enlarge.")
+
+            # Save the tree as an image
+            image_path = "phylo_tree.png"
+            plt.figure(figsize=(8, 8))
+            Phylo.draw(tree_nj, axes=plt.gca())
+            plt.axis('off')
+            plt.savefig(image_path, bbox_inches='tight', pad_inches=0)
+            plt.close()
+
+            # Display the image
+            image = Image.open(image_path)
+            st.image(image, caption="Phylogenetic Tree")
+
+        
+else:
+    sequence_data = []
+    tree_nj = None
+    st.subheader("Add from FASTA")
     fasta_file = st.file_uploader("Upload a FASTA File", type=["fa", "fasta"])
+    
     if fasta_file is not None:
-        new_sequences = add_sequences_from_fasta(fasta_file)
-        sequence_data.extend(new_sequences)
-        _, tree_nj = update_tree(sequence_data, f"Seq{len(sequence_data)}")
+        new_sequences = []
+        with open(fasta_file.name, 'r') as fasta_content:
+            for line in fasta_content:
+                if line.startswith(">"):
+                    new_sequences.append("")
+                else:
+                    new_sequences[-1] += line.strip()
 
-elif operation == "Add FASTA to String Data":
-    fasta_file = st.file_uploader("Upload a FASTA File", type=["fa", "fasta"])
-    if fasta_file is not None:
-        _, tree_nj = build_tree_from_fasta(fasta_file)
+        # sequence_data.extend(new_sequences)
+        # _, tree_nj = update_tree(sequence_data, "Seq_from_fasta")
+        _, tree_nj = update_tree(new_sequences, "Seq_from_fasta")
 
-# Display Tree
-if tree_nj is not None:
-    st.subheader("Phylogenetic Tree")
-    st.text("Click on the image to enlarge.")
+        # Display Tree
+        if tree_nj is not None:
+            st.subheader("Phylogenetic Tree")
+            st.text("Click on the image to enlarge.")
 
-    # Save the tree as an image
-    image_path = "phylo_tree.png"
-    plt.figure(figsize=(8, 8))
-    Phylo.draw(tree_nj, axes=plt.gca())
-    plt.axis('off')
-    plt.savefig(image_path, bbox_inches='tight', pad_inches=0)
-    plt.close()
+            # Save the tree as an image
+            image_path = "phylo_tree.png"
+            plt.figure(figsize=(8, 8))
+            Phylo.draw(tree_nj, axes=plt.gca())
+            plt.axis('off')
+            plt.savefig(image_path, bbox_inches='tight', pad_inches=0)
+            plt.close()
 
-    # Display the image
-    image = Image.open(image_path)
-    st.image(image, caption="Phylogenetic Tree")
+            # Display the image
+            image = Image.open(image_path)
+            st.image(image, caption="Phylogenetic Tree")
+
 
 
