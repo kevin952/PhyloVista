@@ -10,6 +10,8 @@ import random
 import re
 import numpy as np
 import base64
+import plotly.graph_objects as go
+
 
 def calculate_distance_matrix(sequences):
     # Convert sequences to SeqRecord objects
@@ -106,8 +108,9 @@ def get_binary_file_downloader_html(file_path, download_link_text):
     b64 = base64.b64encode(data).decode()
     return f'<a href="data:application/octet-stream;base64,{b64}" download="{file_path}">{download_link_text}</a>'
 
+
 # Streamlit App
-st.title("Phylogenetic Tree Builder")
+st.title("PhyloVista: Real-time Phylogenetic Tree builder")
 
 # Algorithm choice dropdown
 algorithm = st.sidebar.selectbox("Choose Algorithm", ["Neighbor-Joining (nj)", "UPGMA"])
@@ -151,13 +154,12 @@ if operation == "Add Sequence-by-sequence":
         else:  
             # Parse sequences from input
             sequences = [sequence.strip() for sequence in sequences_input.splitlines()]
-            st.text(algorithm.lower())
             _, tree_nj = update_tree(sequences,algorithm.lower())
 
             # Display Tree
             st.subheader("Phylogenetic Tree")
             st.text("Click on the image to enlarge.")
-
+            
             # Save the tree as an image
             image_path = "phylo_tree.png"
             plt.figure(figsize=(8, 8))
@@ -168,7 +170,7 @@ if operation == "Add Sequence-by-sequence":
 
             # Display the image
             image = Image.open(image_path)
-            st.image(image, caption="Phylogenetic Tree")
+            st.image(image, caption=f"Phylogenetic Tree - {algorithm.lower()}")
 
             # Download button
             st.markdown(get_binary_file_downloader_html(image_path, 'Phylo_Tree_Image.png'), unsafe_allow_html=True)
@@ -221,7 +223,6 @@ elif operation == "Add from FASTA":
 
 
 else:
-    st.title("Additivity Checker App")
 
     # Input box for sequences or distance matrix
     input_type = st.selectbox("Select input type:", ["Sequences", "Distance Matrix"])
@@ -298,3 +299,14 @@ else:
                 # Check additivity and display result
                 is_additive_result = is_additive(distance_matrix)
                 st.success(f"Additivity Check Result: {is_additive_result}")
+
+    
+    # Static information about the four-point condition and its uses
+    st.markdown("## Four-Point Condition in Phylogenetic Tree Building")
+    st.markdown("The four-point condition is a criterion used in phylogenetic tree building to assess the reliability of the inferred relationships between taxa based on genetic distances.")
+    st.markdown("### Conditions:")
+    st.markdown("1. **Given three taxa A, B, and C:** If the distance from A to B is less than or equal to the sum of the distances from A to C and C to B, the four-point condition is satisfied.")
+    st.markdown("2. **The condition must hold for all combinations of taxa:** This means that for every set of four taxa A, B, C, and D, the four-point condition should be satisfied.")
+    st.markdown("### Uses:")
+    st.markdown("- **Assessing Tree Topology:** Violation of the four-point condition may indicate inconsistencies in the inferred tree topology.")
+    st.markdown("- **Quality Control:** Checking additivity is a step in ensuring the reliability of the phylogenetic tree.")
