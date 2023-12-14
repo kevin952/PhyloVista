@@ -53,32 +53,22 @@ pip install -r requirements.txt
 
 ## Sequence Input
 ### Add Sequence-by-sequence:
-
-Enter sequences manually in the A, C, T, G format, one sequence per line.
-
-Click "Create Tree" to construct the phylogenetic tree.
+- Enter sequences manually in the A, C, T, G format, one sequence per line.
+- Click "Create Tree" to construct the phylogenetic tree.
 
 ### Add from FASTA:
-
-Upload a FASTA file containing biological sequences.
-
-The application constructs the phylogenetic tree based on the provided sequences.
+- Upload a FASTA file containing biological sequences.
+- The application constructs the phylogenetic tree based on the provided sequences.
 
 ### Additivity Check
-
-After adding sequences, you can check the additivity of the input:
-
-Click the "Check Additivity" button.
-
-The application displays the distance matrix and the result of the additivity check.
+- After adding sequences, you can check the additivity of the input:
+- Click the "Check Additivity" button.
+- The application displays the distance matrix and the result of the additivity check.
 
 ### Phylogenetic Tree Visualization
-
-The constructed phylogenetic tree is displayed in the main content area.
-
-Click on the image to enlarge it.
-
-Download the phylogenetic tree image using the provided link.
+- The constructed phylogenetic tree is displayed in the main content area.
+- Click on the image to enlarge it.
+- Download the phylogenetic tree image using the provided link.
 
 ## Examples
 ### Example 1: Adding Sequences
