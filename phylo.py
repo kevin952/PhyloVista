@@ -37,6 +37,12 @@ def add_sequences_from_fasta(file_path):
             new_sequences.append(str(record.seq))
     return new_sequences
 
+# Function to build a tree directly from a FASTA file
+def build_tree_from_fasta(file_path):
+    sequence_data = add_sequences_from_fasta(file_path)
+    message, tree_nj = update_tree(sequence_data, "Seq_from_fasta")
+    return message, tree_nj
+
 # Example sequences as strings
 sequence_data = ["ATGGCCATTGTAATGGGCCGCTGAAAGGGTGCCCGATAG"]
 
@@ -56,14 +62,12 @@ message, tree_nj = update_tree(sequence_data, "Seq3")
 # Display the updated tree
 Phylo.draw_ascii(tree_nj)
 
-# Add sequences from a FASTA file and update the tree
+# Build a tree directly from a FASTA file
 fasta_file_path = "align_file.fa"
-new_sequences = add_sequences_from_fasta(fasta_file_path)
-sequence_data.extend(new_sequences)
-message, tree_nj = update_tree(sequence_data, "Seq4")
+message, tree_nj_from_fasta = build_tree_from_fasta(fasta_file_path)
 
-# Display the updated tree
-Phylo.draw_ascii(tree_nj)
+# Display the tree from the FASTA file
+Phylo.draw_ascii(tree_nj_from_fasta)
 
 
 
