@@ -1,73 +1,96 @@
+import streamlit as st
+from Bio import Phylo
+from Bio.SeqIO import parse
+from Bio.Align import MultipleSeqAlignment
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio import Phylo
-from Bio.Phylo.TreeConstruction import DistanceCalculator
-from Bio.Phylo.TreeConstruction import DistanceTreeConstructor
-from Bio import AlignIO
+from Bio.Phylo.TreeConstruction import DistanceCalculator, DistanceTreeConstructor
 import matplotlib.pyplot as plt
-from io import BytesIO
-import base64
-import streamlit as st
+from PIL import Image
+import io
 
-# Function to calculate and visualize the phylogenetic tree
-def visualize_phylogenetic_tree(sequences):
-    # Find the length of the longest sequence
-    max_length = max(len(seq) for seq in sequences)
+# Function to create a MultipleSeqAlignment object from a list of sequence strings
+def create_alignment(sequences):
+    seq_records = [SeqRecord(Seq(seq), id=f"Seq{i+1}") for i, seq in enumerate(sequences)]
+    alignment = MultipleSeqAlignment(seq_records)
+    return alignment
 
-    # Pad shorter sequences with gaps and trim longer sequences
-    seq_records = [
-        SeqRecord(Seq(seq.ljust(max_length, ' ')), id=f"Sequence_{i + 1}")
-        for i, seq in enumerate(sequences)
-    ]
+# Function to update the tree with a new sequence
+def update_tree(sequence_data, identifier):
+    if len(sequence_data) == 0:
+        return ["Please add a sequence to create a tree", None]
 
-    # Create a temporary alignment with the padded sequences
-    temp_alignment = AlignIO.MultipleSeqAlignment(seq_records)
+    # Create a MultipleSeqAlignment object
+    alignment = create_alignment(sequence_data)
 
-    # Read the existing alignment from a FASTA file
-    alignment = AlignIO.read('/Users/kevindsouza/Documents/test-proj/alignment_file.fa', 'fasta')
-
-    # Extend the alignment with the padded sequences
-    alignment.extend(temp_alignment)
-
-    # Calculate the distance matrix
+    # Create a DistanceCalculator object
     calculator = DistanceCalculator('identity')
-    dm = calculator.get_distance(alignment)
 
-    # Construct the phylogenetic tree using UPGMA algorithm
-    constructor = DistanceTreeConstructor()
-    tree = constructor.upgma(dm)
+    # Neighbor-joining
+    constructor_nj = DistanceTreeConstructor(calculator)
+    updated_tree = constructor_nj.build_tree(alignment)
 
-    # Draw the phylogenetic tree
-    fig = plt.figure()
-    Phylo.draw(tree, do_show=False)
+    return ["Tree created", updated_tree]
 
-    # Save the figure to a BytesIO object
-    buf = BytesIO()
-    plt.savefig(buf, format='png')
-    buf.seek(0)
+# Function to add sequences from a FASTA file to the existing sequence_data
+def add_sequences_from_fasta(file_path):
+    new_sequences = []
+    with open(file_path, 'r') as fasta_file:
+        records = list(parse(fasta_file, 'fasta'))
+        for record in records:
+            new_sequences.append(str(record.seq))
+    return new_sequences
 
-    # Convert the BytesIO object to a base64-encoded string
-    image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+# Function to build a tree directly from a FASTA file
+def build_tree_from_fasta(file_path):
+    sequence_data = add_sequences_from_fasta(file_path)
+    message, tree_nj = update_tree(sequence_data, "Seq_from_fasta")
+    return message, tree_nj
 
-    # Display the image in Streamlit
-    st.image(f"data:image/png;base64,{image_base64}")
+# Streamlit App
+st.title("Phylogenetic Tree Builder")
 
-# Streamlit application
-def main():
-    st.title("Phylogenetic Tree Visualizer")
+# Sidebar
+st.sidebar.header("Choose Operation")
+operation = st.sidebar.radio("", ["Add Sequence", "Add from FASTA", "Add FASTA to String Data"])
 
-    # User input for sequences
-    user_input = st.text_input("Enter a sequence:")
-    sequences = [user_input]
+# Main Content
+sequence_data = []
+tree_nj = None
 
-    # Display the phylogenetic tree
-    visualize_phylogenetic_tree(sequences)
-
-    # Button to add more sequences
+if operation == "Add Sequence":
+    new_sequence = st.text_area("Enter New Sequence", "")
     if st.button("Add Sequence"):
-        additional_sequence = st.text_input("Enter additional sequence:")
-        sequences.append(additional_sequence)
-        visualize_phylogenetic_tree(sequences)
+        sequence_data.append(new_sequence)
+        _, tree_nj = update_tree(sequence_data, f"Seq{len(sequence_data)}")
 
-if __name__ == "__main__":
-    main()
+elif operation == "Add from FASTA":
+    fasta_file = st.file_uploader("Upload a FASTA File", type=["fa", "fasta"])
+    if fasta_file is not None:
+        new_sequences = add_sequences_from_fasta(fasta_file)
+        sequence_data.extend(new_sequences)
+        _, tree_nj = update_tree(sequence_data, f"Seq{len(sequence_data)}")
+
+elif operation == "Add FASTA to String Data":
+    fasta_file = st.file_uploader("Upload a FASTA File", type=["fa", "fasta"])
+    if fasta_file is not None:
+        _, tree_nj = build_tree_from_fasta(fasta_file)
+
+# Display Tree
+if tree_nj is not None:
+    st.subheader("Phylogenetic Tree")
+    st.text("Click on the image to enlarge.")
+
+    # Save the tree as an image
+    image_path = "phylo_tree.png"
+    plt.figure(figsize=(8, 8))
+    Phylo.draw(tree_nj, axes=plt.gca())
+    plt.axis('off')
+    plt.savefig(image_path, bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+    # Display the image
+    image = Image.open(image_path)
+    st.image(image, caption="Phylogenetic Tree")
+
+
