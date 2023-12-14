@@ -52,11 +52,20 @@ message, tree_nj = update_tree(sequence_data, "Seq1")
 # Add a new sequence and update the tree
 new_sequence = "ATGGCCATTGTAATGGTCCGCTGAAAGGGTGCCCGATAG"
 sequence_data.append(new_sequence)
-message, tree_nj = update_tree(sequence_data, "Seq2")
 
 # Add a new sequence and update the tree
 new_sequence = "ATGGCCATTGTAATGGTCCGCTGAAAGGGTGCCCGTTAG"
 sequence_data.append(new_sequence)
+
+message, tree_nj = update_tree(sequence_data, "Seq2")
+
+# Display the updated tree
+Phylo.draw_ascii(tree_nj)
+
+# Add sequences from a FASTA file and update the tree
+fasta_file_path = "align_file.fa"
+new_sequences = add_sequences_from_fasta(fasta_file_path)
+sequence_data.extend(new_sequences)
 message, tree_nj = update_tree(sequence_data, "Seq3")
 
 # Display the updated tree
