@@ -6,11 +6,11 @@ from Bio.Align import MultipleSeqAlignment
 from Bio.Phylo.TreeConstruction import DistanceCalculator, DistanceTreeConstructor
 import matplotlib.pyplot as plt
 from PIL import Image
-import random
+import os
 import re
 import numpy as np
 import base64
-import plotly.graph_objects as go
+# import plotly.graph_objects as go
 
 
 def calculate_distance_matrix(sequences):
@@ -189,8 +189,16 @@ elif operation == "Add from FASTA":
     st.sidebar.code(">Sequence_1\nACGT\n>Sequence_2\nCGTA\n>Sequence_3\nTACG")
     
     if fasta_file is not None:
+        file_details = {"FileName":fasta_file.name,"FileType":fasta_file.type}
+        st.write(file_details)
+
+        with open(os.path.join("fasta_directory", fasta_file.name),"wb") as f: 
+            f.write(fasta_file.getbuffer())         
+            st.success("Saved File")
+    
+    if fasta_file is not None:
         new_sequences = []
-        with open(fasta_file.name, 'r') as fasta_content:
+        with open(os.path.join("fasta_directory", fasta_file.name), 'r') as fasta_content:
             for line in fasta_content:
                 if line.startswith(">"):
                     new_sequences.append("")
