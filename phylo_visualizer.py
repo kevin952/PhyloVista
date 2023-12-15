@@ -10,7 +10,6 @@ import os
 import re
 import numpy as np
 import base64
-# import plotly.graph_objects as go
 
 
 def calculate_distance_matrix(sequences):
