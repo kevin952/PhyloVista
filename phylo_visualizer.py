@@ -146,33 +146,29 @@ if operation == "Add Sequence-by-sequence":
     # Check additivity button
     if st.button("Create Tree"):
         
-            # Check if sequences are in the valid format
-        if not re.search(r'^[ACGTacgt\n]+$', sequences_input):
-            st.error("Invalid sequence format. Sequences must consist of only 'A', 'C', 'G', or 'T' characters, one sequence per line.")
-            
-        else:  
-            # Parse sequences from input
-            sequences = [sequence.strip() for sequence in sequences_input.splitlines()]
-            _, tree_nj = update_tree(sequences,algorithm.lower())
+    
+        # Parse sequences from input
+        sequences = [sequence.strip() for sequence in sequences_input.splitlines()]
+        _, tree_nj = update_tree(sequences,algorithm.lower())
 
-            # Display Tree
-            st.subheader("Phylogenetic Tree")
-            st.text("Click on the image to enlarge.")
-            
-            # Save the tree as an image
-            image_path = "phylo_tree.png"
-            plt.figure(figsize=(8, 8))
-            Phylo.draw(tree_nj, axes=plt.gca())
-            plt.axis('off')
-            plt.savefig(image_path, bbox_inches='tight', pad_inches=0)
-            plt.close()
+        # Display Tree
+        st.subheader("Phylogenetic Tree")
+        st.text("Click on the image to enlarge.")
+        
+        # Save the tree as an image
+        image_path = "phylo_tree.png"
+        plt.figure(figsize=(8, 8))
+        Phylo.draw(tree_nj, axes=plt.gca())
+        plt.axis('off')
+        plt.savefig(image_path, bbox_inches='tight', pad_inches=0)
+        plt.close()
 
-            # Display the image
-            image = Image.open(image_path)
-            st.image(image, caption=f"Phylogenetic Tree - {algorithm.lower()}")
+        # Display the image
+        image = Image.open(image_path)
+        st.image(image, caption=f"Phylogenetic Tree - {algorithm.lower()}")
 
-            # Download button
-            st.markdown(get_binary_file_downloader_html(image_path, 'Phylo_Tree_Image.png'), unsafe_allow_html=True)
+        # Download button
+        st.markdown(get_binary_file_downloader_html(image_path, 'Phylo_Tree_Image.png'), unsafe_allow_html=True)
 
         
 elif operation == "Add from FASTA":
